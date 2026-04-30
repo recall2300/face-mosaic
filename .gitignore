@@ -1,0 +1,13 @@
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Local tests / logs
+*.log
+scratch/
+node_modules/
+dist/
