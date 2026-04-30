@@ -503,7 +503,7 @@ body {
 .canvas-wrap img {
   display: block;
   max-width: 100%;
-  max-height: 55vh;
+  max-height: 650px;
   object-fit: contain;
   border-radius: var(--radius-lg);
 }

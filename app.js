@@ -613,11 +613,12 @@ function createFaceCard(face, index) {
     </div>
   `;
 
+  const toggle = card.querySelector('.toggle-input');
   const thumbWrap = card.querySelector('.face-thumb-wrap');
   thumbWrap.style.cursor = 'pointer';
   thumbWrap.addEventListener('click', () => {
     face.masked = !face.masked;
-    toggle.checked = face.masked;
+    if (toggle) toggle.checked = face.masked;
     updateFaceCard(face);
     applyMasks();
   });
