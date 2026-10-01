@@ -26,9 +26,9 @@
 - **에러 수정**: 리브랜딩 과정에서 발생했던 모델 로딩 누락 문제를 해결하고 방어 로직을 추가했습니다.
 
 ## 🛠 수정된 주요 파일
-- [index.html](file:///Users/du_mac_pro/.gemini/antigravity/scratch/face-masking-app/web-app/index.html): 다중 업로드, 큐 UI, 일괄 저장 버튼, 라이브러리 추가.
-- [app.js](file:///Users/du_mac_pro/.gemini/antigravity/scratch/face-masking-app/web-app/app.js): 큐 관리, 이모지 렌더링, ZIP 생성, 버그 수정 및 로직 최적화.
-- [styles.css](file:///Users/du_mac_pro/.gemini/antigravity/scratch/face-masking-app/web-app/styles.css): 이미지 큐, 스타일 피커, 카드 클릭 효과 등 디자인 적용.
+- [index.html](../index.html): 다중 업로드, 큐 UI, 일괄 저장 버튼, 라이브러리 추가.
+- [app.js](../app.js): 큐 관리, 이모지 렌더링, ZIP 생성, 버그 수정 및 로직 최적화.
+- [styles.css](../styles.css): 이미지 큐, 스타일 피커, 카드 클릭 효과 등 디자인 적용.
 
 ## ✅ 최종 검증 결과
 - 여러 장의 고해상도 사진 업로드 시 순차적으로 얼굴이 잘 감지됨을 확인했습니다.

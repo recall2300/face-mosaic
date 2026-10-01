@@ -4,15 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>페이스 모자이크 — 얼굴 자동 마스킹</title>
-  <meta name="description" content="사진 속 얼굴을 자동으로 감지하고 마스킹하는 페이스 모자이크 서비스입니다." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <!-- face-api.js CDN -->
-  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+  <meta name="description" content="사진 속 얼굴을 자동으로 감지하고 마스킹하는 페이스 모자이크 서비스입니다. 모든 처리는 브라우저 안에서만 이루어지며 외부 서버로 전송되지 않습니다." />
+  <!-- 로컬 에셋: 외부 CDN 요청 없음 (프라이버시) -->
+  <script defer src="vendor/face-api.min.js"></script>
   <link rel="stylesheet" href="styles.css" />
-  <!-- JSZip for batch download -->
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- JSZip (로컬) for batch download -->
+  <script defer src="vendor/jszip.min.js"></script>
 </head>
 <body>
   <!-- 배경 파티클 -->
@@ -97,6 +94,14 @@
               <span class="style-opt-icon">⬛</span>
               <span class="style-opt-name">모자이크</span>
             </button>
+            <button class="style-opt" data-style="blur" id="style-blur" title="블러">
+              <span class="style-opt-icon">🌫️</span>
+              <span class="style-opt-name">블러</span>
+            </button>
+            <button class="style-opt" data-style="blackbar" id="style-blackbar" title="블랙바">
+              <span class="style-opt-icon">▬</span>
+              <span class="style-opt-name">블랙바</span>
+            </button>
             <button class="style-opt" data-style="😊" id="style-smile" title="웃는 얼굴">😊</button>
             <button class="style-opt" data-style="😂" id="style-lol" title="눈물 웃음">😂</button>
             <button class="style-opt" data-style="🤩" id="style-star" title="별눈 얼굴">🤩</button>
@@ -122,6 +127,10 @@
           <button class="btn-secondary" id="rescanBtn">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
             다시 감지
+          </button>
+          <button class="btn-ghost" id="manualAddBtn" title="드래그로 직접 영역 지정">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/><path d="M8 5.5V10.5M5.5 8H10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            수동 지정
           </button>
           <button class="btn-primary" id="downloadBtn">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2 L8 11" stroke="white" stroke-width="1.5" stroke-linecap="round"/><path d="M5 8 L8 11 L11 8" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 13 L14 13" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>

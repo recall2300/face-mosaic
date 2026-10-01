@@ -1,0 +1,6 @@
+# Git 히스토리/문서는 이미지에 포함하지 않음
+.git/
+docs/
+Dockerfile
+.dockerignore
+.gitignore

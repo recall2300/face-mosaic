@@ -2,6 +2,43 @@
    페이스 모자이크 - 전역 스타일
    =================================== */
 
+/* Outfit 폰트 (로컬 셀프호스팅 - 외부 요청 없음) */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('fonts/outfit-300.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/outfit-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/outfit-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('fonts/outfit-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('fonts/outfit-700.woff2') format('woff2');
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -506,6 +543,7 @@ body {
   max-height: 650px;
   object-fit: contain;
   border-radius: var(--radius-lg);
+  image-orientation: from-image; /* EXIF 회전 정보 존중 (구형 브라우저 대비) */
 }
 
 .canvas-wrap canvas {
@@ -516,6 +554,21 @@ body {
   height: 100%;
   border-radius: var(--radius-lg);
   pointer-events: none;
+}
+
+/* 수동 영역 지정 모드: 캔버스가 드래그 이벤트를 받음 */
+#maskCanvas.manual-mode {
+  pointer-events: auto;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* 수동 지정 버튼 활성 상태 */
+#manualAddBtn.active {
+  border-color: var(--purple);
+  color: var(--text-primary);
+  background: var(--purple-dim);
+  box-shadow: 0 0 0 1px var(--purple), var(--shadow-glow);
 }
 
 /* 스캔 라인 애니메이션 */
