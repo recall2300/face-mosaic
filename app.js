@@ -18,6 +18,9 @@ const MAX_FILE_COUNT = 50;                // 한 번에 처리할 최대 장수
 const MAX_DETECT_SIZE = 1024;             // 감지용 리사이즈 상한
 const MAX_OUTPUT_MEGAPIXELS = 16;         // 저장 이미지 상한 (iOS Safari 캔버스 제한 고려)
 
+// 앱 버전 (페이지 헤더에 표시 — 배포 확인할 때 사용)
+const APP_VERSION = 'v2.1';
+
 // 모델은 로컬(models/) 우선, 실패 시 CDN 폴백
 const MODEL_URLS = [
   'models',
@@ -78,9 +81,37 @@ const queueCount      = $('queueCount');
 // 초기화
 // ===================================
 document.addEventListener('DOMContentLoaded', () => {
+  initVersionBadge();
+  initTheme();
   setupEventListeners();
   // 모델은 사진 선택 시 로드 (지연 로딩)
 });
+
+// 헤더에 버전 표시 (배포 버전 바로 확인용)
+function initVersionBadge() {
+  const badge = $('versionBadge');
+  if (badge) badge.textContent = APP_VERSION;
+}
+
+// 테마 (라이트 기본, 다크 전환 가능 — 선택은 localStorage에 저장)
+function initTheme() {
+  const saved = localStorage.getItem('fm-theme');
+  const theme = saved === 'dark' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  updateThemeIcon(theme);
+
+  $('themeToggle').addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('fm-theme', next);
+    updateThemeIcon(next);
+  });
+}
+
+function updateThemeIcon(theme) {
+  const icon = $('themeIcon');
+  if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
 
 function setupEventListeners() {
   // 업로드 드래그 앤 드롭
@@ -638,21 +669,21 @@ function applyMasks() {
  * 마스크 렌더링 진입점 (미리보기·단일 저장·일괄 저장 공용)
  * x, y, w, h는 bbox 원본 좌표, scale은 (출력좌표 / 원본좌표) 비율
  */
-function drawMasksOnto(ctx, imgData, sourceImg, scale, naturalW, naturalH) {
+function drawMasksOnto(ctx, imgData, sourceImg, scaleX, scaleY, naturalW, naturalH) {
   imgData.faces.forEach(face => {
     if (!face.masked) return;
     const { x, y, w, h } = face.bbox;
-    const dx = x * scale;
-    const dy = y * scale;
-    const dw = w * scale;
-    const dh = h * scale;
+    const dx = x * scaleX;
+    const dy = y * scaleY;
+    const dw = w * scaleX;
+    const dh = h * scaleY;
 
     switch (state.maskStyle) {
       case 'mosaic':
-        drawPixelMosaic(ctx, dx, dy, dw, dh, sourceImg, scale, scale, naturalW, naturalH);
+        drawPixelMosaic(ctx, dx, dy, dw, dh, sourceImg, scaleX, scaleY, naturalW, naturalH);
         break;
       case 'blur':
-        drawBlurMask(ctx, dx, dy, dw, dh, sourceImg, scale, scale, naturalW, naturalH);
+        drawBlurMask(ctx, dx, dy, dw, dh, sourceImg, scaleX, scaleY, naturalW, naturalH);
         break;
       case 'blackbar':
         drawBlackBarMask(ctx, dx, dy, dw, dh);
@@ -835,6 +866,14 @@ function createFaceCard(face, index) {
 
   const toggle = card.querySelector('.toggle-input');
   const thumbWrap = card.querySelector('.face-thumb-wrap');
+
+  // 토글 스위치 직접 클릭 시에도 상태 반영 (없으면 체크박스만 바뀌고 마스킹은 그대로인 버그)
+  toggle.addEventListener('change', () => {
+    face.masked = toggle.checked;
+    updateFaceCard(face);
+    applyMasks();
+  });
+
   thumbWrap.style.cursor = 'pointer';
   thumbWrap.addEventListener('click', () => {
     face.masked = !face.masked;
@@ -892,6 +931,13 @@ function baseName(name) {
   return i > 0 ? name.slice(0, i) : (name || 'image');
 }
 
+// 저장 파일명에 마스크 스타일 반영 (예: photo_mosaic.jpg, photo_blur.jpg)
+function styleSuffix() {
+  const s = state.maskStyle;
+  if (s === 'mosaic' || s === 'blur' || s === 'blackbar') return s;
+  return 'emoji';
+}
+
 function triggerDownload(url, filename, revokeAfterMs = 10000) {
   const link = document.createElement('a');
   link.download = filename;
@@ -922,14 +968,14 @@ async function downloadMaskedImage() {
   ctx.drawImage(sourceImage, 0, 0, out.w, out.h);
 
   // 미리보기와 동일한 drawMasksOnto 사용 (좌표계만 출력 크기에 맞춤)
-  drawMasksOnto(ctx, imgData, sourceImage, s, imgData.naturalW, imgData.naturalH);
+  drawMasksOnto(ctx, imgData, sourceImage, s, s, imgData.naturalW, imgData.naturalH);
 
   output.toBlob(blob => {
     if (!blob) {
       showToast('이미지 저장에 실패했습니다.', 'error');
       return;
     }
-    triggerDownload(URL.createObjectURL(blob), `${baseName(imgData.name)}_mosaic.jpg`);
+    triggerDownload(URL.createObjectURL(blob), `${baseName(imgData.name)}_${styleSuffix()}.jpg`);
     showToast('이미지가 저장되었습니다!', 'success');
   }, 'image/jpeg', 0.92);
 }
@@ -954,7 +1000,7 @@ async function downloadAllImages() {
   try {
     for (const imgData of doneImages) {
       const blob = await renderMaskedBlob(imgData);
-      folder.file(`${baseName(imgData.name)}_mosaic.jpg`, blob);
+      folder.file(`${baseName(imgData.name)}_${styleSuffix()}.jpg`, blob);
     }
 
     const content = await zip.generateAsync({ type: 'blob' });
@@ -981,7 +1027,7 @@ async function renderMaskedBlob(imgData) {
       ctx.drawImage(tempImg, 0, 0, out.w, out.h);
 
       // 단일 저장과 동일한 마스크 렌더링 경로
-      drawMasksOnto(ctx, imgData, tempImg, s, imgData.naturalW, imgData.naturalH);
+      drawMasksOnto(ctx, imgData, tempImg, s, s, imgData.naturalW, imgData.naturalH);
 
       canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('toBlob failed')), 'image/jpeg', 0.9);
     };

@@ -45,7 +45,50 @@
   padding: 0;
 }
 
+/* 라이트 모드 (기본) */
 :root {
+  color-scheme: light;
+
+  --bg-base: #f5f5f8;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f1f6;
+  --bg-elevated: #ffffff;
+  --border: #e7e7ee;
+  --border-strong: #d8d8e2;
+
+  --purple: #9333ea;
+  --purple-dim: rgba(147, 51, 234, 0.09);
+  --cyan: #0891b2;
+  --cyan-dim: rgba(8, 145, 178, 0.09);
+
+  --gradient-main: linear-gradient(135deg, #9333ea, #0891b2);
+  --gradient-glow: linear-gradient(135deg, rgba(147,51,234,0.16), rgba(8,145,178,0.16));
+
+  --text-primary: #17171d;
+  --text-secondary: #5c5c68;
+  --text-muted: #9c9ca8;
+
+  --header-bg: rgba(255, 255, 255, 0.82);
+  --toast-bg: rgba(255, 255, 255, 0.96);
+  --overlay-bg: rgba(245, 245, 248, 0.72);
+  --thumb-bg: #ececf1;
+  --toggle-track: #d6d6e0;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  --shadow-glow: 0 0 40px rgba(147, 51, 234, 0.10);
+  --shadow-card: 0 1px 2px rgba(23, 23, 40, 0.05), 0 12px 32px rgba(23, 23, 40, 0.08);
+
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 다크 모드 (토글로 전환) */
+[data-theme="dark"] {
+  color-scheme: dark;
+
   --bg-base: #080810;
   --bg-surface: rgba(255, 255, 255, 0.04);
   --bg-surface-hover: rgba(255, 255, 255, 0.07);
@@ -65,15 +108,25 @@
   --text-secondary: rgba(255, 255, 255, 0.55);
   --text-muted: rgba(255, 255, 255, 0.3);
 
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
+  --header-bg: rgba(8, 8, 16, 0.8);
+  --toast-bg: rgba(20, 20, 32, 0.95);
+  --overlay-bg: rgba(8, 8, 16, 0.75);
+  --thumb-bg: #0f0f1a;
+  --toggle-track: rgba(255, 255, 255, 0.12);
 
   --shadow-glow: 0 0 40px rgba(168, 85, 247, 0.15);
   --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
 
-  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+/* 라이트 모드에서 배경 오브는 은은하게 */
+[data-theme="light"] .orb-1 {
+  background: radial-gradient(circle, rgba(147,51,234,0.10) 0%, transparent 70%);
+}
+[data-theme="light"] .orb-2 {
+  background: radial-gradient(circle, rgba(8,145,178,0.08) 0%, transparent 70%);
+}
+[data-theme="light"] .orb-3 {
+  background: radial-gradient(circle, rgba(147,51,234,0.06) 0%, transparent 70%);
 }
 
 html, body {
@@ -142,7 +195,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 16px 28px;
-  background: rgba(8, 8, 16, 0.8);
+  background: var(--header-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
@@ -171,6 +224,45 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* 버전 배지 */
+.version-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--purple);
+  background: var(--purple-dim);
+  border: 1px solid var(--border-strong);
+  padding: 3px 9px;
+  border-radius: 100px;
+  line-height: 1;
+}
+
+/* 테마 토글 */
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.07);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-card);
+}
+
+.theme-toggle:active {
+  transform: scale(0.96);
 }
 
 .nav-badge {
@@ -442,7 +534,7 @@ body {
   cursor: pointer;
   transition: var(--transition);
   position: relative;
-  background: #0f0f1a;
+  background: var(--thumb-bg);
 }
 
 .queue-item img {
@@ -707,7 +799,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  background: rgba(8, 8, 16, 0.75);
+  background: var(--overlay-bg);
   backdrop-filter: blur(8px);
   border-radius: var(--radius-lg);
   z-index: 10;
@@ -843,7 +935,7 @@ body {
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
-  background: #0f0f1a;
+  background: var(--thumb-bg);
 }
 
 .face-thumb-wrap img {
@@ -908,7 +1000,7 @@ body {
   display: inline-block;
   width: 36px;
   height: 20px;
-  background: rgba(255,255,255,0.12);
+  background: var(--toggle-track);
   border-radius: 100px;
   cursor: pointer;
   position: relative;
@@ -978,7 +1070,7 @@ body {
   align-items: center;
   gap: 12px;
   padding: 12px 18px;
-  background: rgba(20, 20, 32, 0.95);
+  background: var(--toast-bg);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   backdrop-filter: blur(20px);
