@@ -19,7 +19,7 @@ const MAX_DETECT_SIZE = 1024;             // 감지용 리사이즈 상한
 const MAX_OUTPUT_MEGAPIXELS = 16;         // 저장 이미지 상한 (iOS Safari 캔버스 제한 고려)
 
 // 앱 버전 (페이지 헤더에 표시 — 배포 확인할 때 사용)
-const APP_VERSION = 'v2.1';
+const APP_VERSION = 'v2.2';
 
 // 모델은 로컬(models/) 우선, 실패 시 CDN 폴백
 const MODEL_URLS = [
@@ -151,6 +151,12 @@ function setupEventListeners() {
   newImageBtn.addEventListener('click', resetToUpload);
   rescanBtn.addEventListener('click', () => detectFaces());
   manualAddBtn.addEventListener('click', toggleManualMode);
+
+// 얼굴 미감지 상태에서도 바로 수동 지정 진입 가능
+$('noFacesManualBtn').addEventListener('click', () => {
+  if (state.currentIndex === -1) return;
+  if (!state.manualMode) toggleManualMode();
+});
   downloadBtn.addEventListener('click', downloadMaskedImage);
   downloadAllBtn.addEventListener('click', downloadAllImages);
   maskAllBtn.addEventListener('click', () => setAllMasks(true));
@@ -697,7 +703,7 @@ function drawMasksOnto(ctx, imgData, sourceImg, scaleX, scaleY, naturalW, natura
 // ---- 픽셀 모자이크 (미리보기·저장 공용 단일 구현) ----
 function drawPixelMosaic(ctx, x, y, w, h, sourceImg, scaleX, scaleY, naturalW, naturalH) {
   const blockSize = Math.max(8, Math.min(w, h) * 0.1);
-  const padding = Math.max(w, h) * 0.08;
+  const padding = Math.max(w, h) * 0.15; // 얼굴 가장자리가 삐져나오지 않도록 여백 확대
 
   // 출력 좌표계에서 패딩 rect를 구한 뒤 원본 경계로 클램프
   const px = Math.max(0, x - padding);
@@ -738,7 +744,7 @@ function drawPixelMosaic(ctx, x, y, w, h, sourceImg, scaleX, scaleY, naturalW, n
 
 // ---- 블러 마스크 ----
 function drawBlurMask(ctx, x, y, w, h, sourceImg, scaleX, scaleY, naturalW, naturalH) {
-  const padding = Math.max(w, h) * 0.08;
+  const padding = Math.max(w, h) * 0.15; // 얼굴 가장자리가 삐져나오지 않도록 여백 확대
   const px = Math.max(0, x - padding);
   const py = Math.max(0, y - padding);
   const maxW = naturalW * scaleX;
@@ -773,7 +779,7 @@ function drawBlurMask(ctx, x, y, w, h, sourceImg, scaleX, scaleY, naturalW, natu
 
 // ---- 블랙바 마스크 (눈 주변 가림) ----
 function drawBlackBarMask(ctx, x, y, w, h) {
-  const padding = Math.max(w, h) * 0.06;
+  const padding = Math.max(w, h) * 0.1;
   const bx = x - padding;
   const by = y + h * 0.15;
   const bw = w + padding * 2;
@@ -998,11 +1004,16 @@ async function downloadAllImages() {
   const folder = zip.folder('face_mosaic_photos');
 
   try {
+    const total = doneImages.length;
+    let i = 0;
     for (const imgData of doneImages) {
+      i++;
+      setLoading(true, `일괄 저장 중... ${i}/${total}`);
       const blob = await renderMaskedBlob(imgData);
       folder.file(`${baseName(imgData.name)}_${styleSuffix()}.jpg`, blob);
     }
 
+    setLoading(true, 'ZIP 파일 만드는 중...');
     const content = await zip.generateAsync({ type: 'blob' });
     triggerDownload(URL.createObjectURL(content), `face_mosaic_batch_${Date.now()}.zip`);
     showToast(`${doneImages.length}장의 사진이 ZIP으로 저장되었습니다!`, 'success');
@@ -1123,3 +1134,14 @@ window.addEventListener('resize', () => {
     requestAnimationFrame(applyMasks);
   }
 });
+
+// ===================================
+// PWA: 서비스 워커 등록 (오프라인 + 홈 화면 설치)
+// ===================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((err) => {
+      console.warn('Service worker registration failed:', err);
+    });
+  });
+}
